@@ -1,6 +1,7 @@
 package com.coolweather.android;
 
 import android.app.ProgressDialog;
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
@@ -74,6 +75,12 @@ public class ChooseAreaFragment extends Fragment {
                 }else if (currentLevel==LEVEL_CITY){
                     selectedCity=cityList.get(position);
                     queryCounties();
+                }else if (currentLevel==LEVEL_COUNTY){
+                    String weatherId=countyList.get(position).getWeatherId();
+                    Intent intent=new Intent(getActivity(),WeatherActivity.class);
+                    intent.putExtra("weather_id",weatherId);
+                    startActivity(intent);
+                    getActivity().finish();
                 }
             }
         });
@@ -111,7 +118,7 @@ public class ChooseAreaFragment extends Fragment {
     private void queryCities(){
         titleText.setText(selectedProvince.getProvinceName());
         backButton.setVisibility(View.VISIBLE);
-        cityList=DataSupport.where("provinceid=?",String.valueOf(selectedProvince.getId()))
+        cityList=DataSupport.where("provinceid = ?",String.valueOf(selectedProvince.getId()))
                 .find(City.class);
         if (cityList.size()>0){
             dataList.clear();
@@ -131,7 +138,7 @@ public class ChooseAreaFragment extends Fragment {
     private void queryCounties(){
         titleText.setText(selectedCity.getCityName());
         backButton.setVisibility(View.VISIBLE);
-        countyList= DataSupport.where("cityid=?",String.valueOf(selectedCity.getId()))
+        countyList= DataSupport.where("cityid = ?",String.valueOf(selectedCity.getId()))
                 .find(County.class);
         if (countyList.size()>0){
             dataList.clear();
@@ -144,7 +151,7 @@ public class ChooseAreaFragment extends Fragment {
         }else{
             int provinceCode=selectedProvince.getProvinceCode();
             int cityCode=selectedCity.getCityCode();
-            String address="http://guolin.tech/api/china/"+provinceCode+"/"+cityCode;
+            String address="http://guolin.tech/api/china/"+ provinceCode +"/" + cityCode;
             queryFromServer(address,"county");
         }
     }
@@ -174,7 +181,6 @@ public class ChooseAreaFragment extends Fragment {
                 }else if ("county".equals(type)){
                     result=Utility.handleCountyResponse(responseText,selectedCity.getId());
                 }
-
                 if (result){
                     getActivity().runOnUiThread(new Runnable() {
                         @Override
